@@ -25,28 +25,28 @@ const FilterControls: React.FC<FilterControlsProps> = ({ startDate, setStartDate
   };
 
   return (
-    <div className="p-4">
-      <div className="bg-card-light dark:bg-card-dark rounded-lg p-4 flex items-center space-x-4 border border-border-light dark:border-border-dark">
+    <div className="px-4 pt-2 pb-4">
+      <div className="flex items-center space-x-4">
         <div>
-          <label htmlFor="start-month" className="block text-xs font-medium text-text-light/70 dark:text-text-dark/70 mb-1">Start Month</label>
+          <label htmlFor="start-month" className="block text-xs font-medium text-text-light/70 dark:text-text-dark/70 mb-1">Mois de début</label>
           <input
             type="month"
             id="start-month"
             value={getMonthInputValue(startDate)}
             onChange={handleMonthChange}
-            className="block w-full text-base bg-background-light dark:bg-background-dark border-border-light dark:border-border-dark border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-status-confirmed/50"
+            className="block w-full text-sm bg-card-light dark:bg-card-dark border-border-light dark:border-border-dark border rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-status-confirmed"
           />
         </div>
         <div>
-          <label htmlFor="num-months" className="block text-xs font-medium text-text-light/70 dark:text-text-dark/70 mb-1">Months to Display</label>
+          <label htmlFor="num-months" className="block text-xs font-medium text-text-light/70 dark:text-text-dark/70 mb-1">Mois à afficher</label>
           <select
             id="num-months"
             value={numMonths}
             onChange={handleNumMonthsChange}
-            className="block w-full text-base bg-background-light dark:bg-background-dark border-border-light dark:border-border-dark border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-status-confirmed/50"
+            className="block w-full text-sm bg-card-light dark:bg-card-dark border-border-light dark:border-border-dark border rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-status-confirmed"
           >
             {[1, 2, 3, 4, 5, 6, 12].map(num => (
-              <option key={num} value={num}>{num} month{num > 1 ? 's' : ''}</option>
+              <option key={num} value={num}>{num} mois</option>
             ))}
           </select>
         </div>

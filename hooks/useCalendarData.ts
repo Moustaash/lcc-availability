@@ -50,7 +50,7 @@ export const useCalendarData = () => {
         setBookingsBySlug(processedData);
         setSyncStatus(SyncStatus.Success);
       } catch (err) {
-        setError('Failed to process booking data.');
+        setError('Échec du traitement des données de réservation.');
         setSyncStatus(SyncStatus.Error);
         console.error(err);
       } finally {

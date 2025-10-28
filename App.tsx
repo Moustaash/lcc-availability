@@ -38,7 +38,7 @@ const App: React.FC = () => {
           numMonths={numMonths}
           setNumMonths={setNumMonths}
         />
-        <div className="p-4">
+        <div className="px-4 pb-4">
           <AvailabilityGrid
             properties={PROPERTIES}
             bookingsBySlug={bookingsBySlug}

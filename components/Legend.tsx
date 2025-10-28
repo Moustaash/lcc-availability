@@ -6,7 +6,7 @@ const Legend: React.FC = () => {
       <div className="flex items-center justify-end space-x-6">
         <div className="flex items-center">
           <div className="w-4 h-4 rounded-sm bg-status-confirmed mr-2"></div>
-          <span className="text-sm text-text-light/80 dark:text-text-dark/80">Confirmed</span>
+          <span className="text-sm text-text-light/80 dark:text-text-dark/80">Confirmé</span>
         </div>
         <div className="flex items-center">
           <div className="w-4 h-4 rounded-sm bg-status-option mr-2"></div>
@@ -14,7 +14,7 @@ const Legend: React.FC = () => {
         </div>
         <div className="flex items-center">
           <div className="w-4 h-4 rounded-sm border border-border-light dark:border-border-dark mr-2"></div>
-          <span className="text-sm text-text-light/80 dark:text-text-dark/80">Available</span>
+          <span className="text-sm text-text-light/80 dark:text-text-dark/80">Disponible</span>
         </div>
       </div>
     </div>

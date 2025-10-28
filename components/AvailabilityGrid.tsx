@@ -68,46 +68,51 @@ const AvailabilityGrid: React.FC<AvailabilityGridProps> = ({ properties, booking
 
   return (
     <div className="overflow-x-auto border border-border-light dark:border-border-dark rounded-lg">
-      <div className="grid" style={{ gridTemplateColumns: `repeat(${totalDays}, minmax(35px, 1fr)) 150px` }}>
+      <div className="grid" style={{ gridTemplateColumns: `200px repeat(${totalDays}, minmax(35px, 1fr))` }}>
+        {/* Top-left corner */}
+        <div className="sticky top-0 left-0 z-20 bg-card-light dark:bg-card-dark border-b border-r border-border-light dark:border-border-dark"></div>
+        
         {/* Month Headers */}
         {monthData.map(({ monthName, startDay, daysInMonth }) => (
-          <div key={monthName} style={{ gridColumn: `${startDay} / span ${daysInMonth}` }} className="col-span-1 text-center font-semibold p-2 border-b border-r border-border-light dark:border-border-dark text-sm">
+          <div key={monthName} style={{ gridColumn: `${startDay + 1} / span ${daysInMonth}` }} className="sticky top-0 z-10 bg-card-light dark:bg-card-dark text-center font-semibold p-2 border-b border-r border-border-light dark:border-border-dark text-sm">
             {monthName}
           </div>
         ))}
-        <div className="border-b border-border-light dark:border-border-dark"></div>
 
         {/* Day Headers */}
-        {monthData.flatMap(({ year, month, daysInMonth }) => 
+        {monthData.flatMap(({ year, month, daysInMonth }, monthIndex) => 
             [...Array(daysInMonth)].map((_, dayIndex) => {
                 const day = dayIndex + 1;
                 const date = new Date(year, month, day);
                 const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                const gridColumnStart = monthData.slice(0, monthIndex).reduce((acc, m) => acc + m.daysInMonth, 1) + dayIndex + 1;
                 return (
                     <div
                         key={`${year}-${month}-${day}`}
-                        className={`text-center text-xs p-1 h-8 flex items-center justify-center border-b border-r border-border-light dark:border-border-dark ${isWeekend ? 'text-text-light/60 dark:text-text-dark/60' : ''}`}
+                        style={{ gridRow: 2, gridColumn: gridColumnStart }}
+                        className={`sticky top-12 z-10 bg-card-light dark:bg-card-dark text-center text-xs p-1 h-8 flex items-center justify-center border-b border-r border-border-light dark:border-border-dark ${isWeekend ? 'text-text-light/60 dark:text-text-dark/60' : ''}`}
                     >
                         {day}
                     </div>
                 );
             })
         )}
-        <div className="border-b border-r border-border-light dark:border-border-dark"></div>
         
         {/* Property Rows */}
-        {properties.map((property) => (
+        {properties.map((property, propertyIndex) => (
           <React.Fragment key={property.slug}>
-            <div className="col-span-1 relative h-16 border-b border-border-light dark:border-border-dark" style={{ gridColumn: `1 / span ${totalDays}` }}>
-              {/* Day cells for grid lines */}
-              {[...Array(totalDays)].map((_, i) => (
-                 <div key={i} className={`h-full border-r border-border-light dark:border-border-dark`}></div>
-              ))}
-              {renderBookings(property.slug)}
+            <div className="sticky left-0 bg-card-light dark:bg-card-dark z-10 p-2 border-b border-r border-border-light dark:border-border-dark flex items-center" style={{gridRow: propertyIndex + 3}}>
+              <img src={property.imageUrl} alt={property.nameEN} className="w-8 h-8 object-cover rounded-full mr-3" />
+              <span className="font-medium text-sm">{property.nameEN}</span>
             </div>
-            <div className="sticky right-0 bg-card-light dark:bg-card-dark z-10 p-2 border-b border-border-light dark:border-border-dark flex items-center justify-end">
-              <span className="font-medium text-sm text-right mr-2">{property.nameEN}</span>
-              <img src={property.imageUrl} alt={property.nameEN} className="w-8 h-8 object-cover rounded-full" />
+            <div className="col-span-1 relative h-16 border-b border-border-light dark:border-border-dark" style={{ gridColumn: `2 / span ${totalDays}`, gridRow: propertyIndex + 3 }}>
+              {/* Day cells for grid lines */}
+              <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${totalDays}, 1fr)`}}>
+                {[...Array(totalDays)].map((_, i) => (
+                   <div key={i} className={`h-full border-r border-border-light dark:border-border-dark`}></div>
+                ))}
+              </div>
+              {renderBookings(property.slug)}
             </div>
           </React.Fragment>
         ))}

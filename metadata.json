@@ -1,5 +1,5 @@
 {
-  "name": "Chalet Availability Visualizer",
-  "description": "An interactive calendar to visualize booking availability for Les Chalets Covarel. It loads and parses iCal files for each property, displaying confirmed and optional bookings in a color-coded grid.",
+  "name": "Visualiseur de Disponibilité des Chalets",
+  "description": "Un calendrier interactif pour visualiser la disponibilité des réservations pour Les Chalets Covarel. Il charge et analyse les données de réservation pour chaque propriété, affichant les réservations confirmées et les options dans une grille à code couleur.",
   "requestFramePermissions": []
 }
