@@ -1,65 +1,69 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chalet Availability Visualizer</title>
+  <title>Chalet Availability</title>
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-  <!-- date-fns for robust date manipulation -->
-  <script defer src="https://cdn.jsdelivr.net/npm/date-fns@3/cdn.min.js"></script>
+  <!-- Import Map -->
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://aistudiocdn.com/react@^19.2.0",
+      "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+      "react/": "https://aistudiocdn.com/react@^19.2.0/"
+    }
+  }
+  </script>
+
+  <!-- Tailwind Config -->
   <script>
     tailwind.config = {
-      darkMode: "class",
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
             primary: "#8f3e32",
-            "background-light": "#f8f6f6",
-            "background-dark": "#141414",
-            "card-light": "#FFFFFF",
-            "card-dark": "#1f1f1f",
-            "text-light": "#2B2B2B",
-            "text-dark": "#e8e8e8",
-            "border-light": "#e0e0e0",
-            "border-dark": "#333333",
-            "status-confirmed": "#8f3e32",
-            "status-option": "#d97706", // amber-600
+            'background-light': '#f8f6f6',
+            'background-dark': '#0d1117',
+            'card-light': '#ffffff',
+            'card-dark': '#161b22',
+            'text-light': '#2B2B2B',
+            'text-dark': '#e8e8e8',
+            'border-light': '#e0e0e0',
+            'border-dark': '#30363d',
+            'status-confirmed': '#3b82f6', // blue-500
+            'status-option': '#f59e0b', // amber-500
           },
           fontFamily: {
-            sans: ["Manrope", "sans-serif"],
+            sans: ['Manrope', 'sans-serif'],
           },
         },
       },
-    };
+    }
   </script>
   <style>
     body { font-family: 'Manrope', sans-serif; }
-    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
     /* Simple scrollbar styling for webkit browsers */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #1f1f1f; }
-    ::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #718096; }
+    html.dark ::-webkit-scrollbar { width: 8px; height: 8px; }
+    html.dark ::-webkit-scrollbar-track { background: #0d1117; }
+    html.dark ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+    html.dark ::-webkit-scrollbar-thumb:hover { background: #48515c; }
   </style>
-<script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "date-fns": "https://aistudiocdn.com/date-fns@^4.1.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
-  }
-}
-</script>
 </head>
-<body class="bg-background-dark text-text-dark antialiased">
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark antialiased">
+  <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
+  <script type="module" src="index.tsx"></script>
 </body>
 </html>

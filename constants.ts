@@ -1,4 +1,5 @@
 
+
 import { Property } from './types';
 
 // Define IMAGES before they are used to build the PROPERTIES array.

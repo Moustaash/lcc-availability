@@ -1,33 +1,15 @@
 
+export enum BookingStatus {
+  Confirmed = 'reservation',
+  Option = 'option',
+}
+
 export interface Property {
   nameFR: string;
   nameEN: string;
   nameES: string;
   slug: string;
-  imageUrl?: string;
-}
-
-export enum BookingStatus {
-  Confirmed = 'CONFIRMED',
-  Option = 'OPTION',
-  Cancelled = 'CANCELLED',
-  Unknown = 'UNKNOWN'
-}
-
-export enum SyncStatus {
-  SYNCING = 'SYNCING',
-  SYNCED = 'SYNCED',
-  ERROR = 'ERROR',
-}
-
-export interface Booking {
-  id: string;
-  summary: string;
-  description: string;
-  startDate: Date;
-  endDate: Date;
-  status: BookingStatus;
-  propertySlug: string;
+  imageUrl: string;
 }
 
 export interface RawBooking {
@@ -36,8 +18,8 @@ export interface RawBooking {
   culture: string;
   lot_no: number;
   lot_ref: string;
-  start_date: string; // ISO string
-  end_date: string;   // ISO string
+  start_date: string;
+  end_date: string;
   comm_no: number;
   price_total_eur: string;
   price_sr_eur: string;
@@ -45,6 +27,23 @@ export interface RawBooking {
   hide_price_web: boolean;
   is_available: boolean;
   duration_days: number;
-  updated_at: string; // ISO string
-  Mode: string; // "reservation" or "option"
+  updated_at: string;
+  Mode: 'reservation' | 'option';
+}
+
+export interface Booking {
+  id: string;
+  propertySlug: string;
+  startDate: Date;
+  endDate: Date;
+  status: BookingStatus;
+  price: number;
+  isAvailable: boolean;
+}
+
+export enum SyncStatus {
+  Idle,
+  Syncing,
+  Success,
+  Error,
 }

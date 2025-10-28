@@ -1,68 +1,65 @@
-
 import React, { useState } from 'react';
-import Header from './components/Header';
-import AvailabilityGrid from './components/AvailabilityGrid';
-import Legend from './components/Legend';
-import Spinner from './components/Spinner';
 import { useCalendarData } from './hooks/useCalendarData';
 import { PROPERTIES } from './constants';
-
-// FIX: The `date-fns` library is loaded globally from a script, not imported as a module.
-// This declares the global variable to TypeScript.
-declare const dateFns: any;
+import Header from './components/Header';
+import AvailabilityGrid from './components/AvailabilityGrid';
+import FilterControls from './components/FilterControls';
+import Legend from './components/Legend';
+import Spinner from './components/Spinner';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 const App: React.FC = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
   const { bookingsBySlug, syncStatus, loading, error } = useCalendarData();
+  const [startDate, setStartDate] = useState(new Date(2025, 9, 1)); // Default to Oct 2025 for demo
+  const [numMonths, setNumMonths] = useState(3);
 
-  const handlePrevMonth = () => {
-    // FIX: Use the global `dateFns` object, consistent with other components.
-    setCurrentDate(current => dateFns.subMonths(current, 1));
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex justify-center items-center h-64">
+          <Spinner />
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="text-center text-red-500 p-4">
+          <p>{error}</p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <FilterControls
+          startDate={startDate}
+          setStartDate={setStartDate}
+          numMonths={numMonths}
+          setNumMonths={setNumMonths}
+        />
+        <div className="p-4">
+          <AvailabilityGrid
+            properties={PROPERTIES}
+            bookingsBySlug={bookingsBySlug}
+            startDate={startDate}
+            numMonths={numMonths}
+          />
+        </div>
+        <Legend />
+      </>
+    );
   };
-
-  const handleNextMonth = () => {
-    // FIX: Use the global `dateFns` object, consistent with other components.
-    setCurrentDate(current => dateFns.addMonths(current, 1));
-  };
-
-  const handleToday = () => {
-    setCurrentDate(new Date());
-  };
-
+  
   return (
-    <div className="min-h-screen flex flex-col p-4 sm:p-6 lg:p-8 bg-background-dark">
-      <Header 
-        currentDate={currentDate}
-        onPrevMonth={handlePrevMonth}
-        onNextMonth={handleNextMonth}
-        onToday={handleToday}
-      />
-      <main className="flex-grow flex flex-col mt-6">
-        {loading && (
-          <div className="flex-grow flex flex-col items-center justify-center">
-            <Spinner />
-            <p className="mt-4 text-text-dark/80">Loading calendar data...</p>
-          </div>
-        )}
-        {error && (
-          <div className="flex-grow flex items-center justify-center bg-red-900/50 text-red-300 p-4 rounded-lg">
-            <span className="material-symbols-outlined mr-2">error</span>
-            <p>Error loading calendar data: {error}</p>
-          </div>
-        )}
-        {!loading && !error && (
-          <div className="flex-grow flex flex-col">
-            <AvailabilityGrid
-              properties={PROPERTIES}
-              bookingsBySlug={bookingsBySlug}
-              syncStatus={syncStatus}
-              viewDate={currentDate}
-            />
-            <Legend />
-          </div>
-        )}
-      </main>
-    </div>
+    <ThemeProvider>
+        <div className="bg-background-light dark:bg-background-dark min-h-screen text-text-light dark:text-text-dark">
+            <Header syncStatus={syncStatus} />
+            <main>
+                {renderContent()}
+            </main>
+        </div>
+    </ThemeProvider>
   );
 };
 
