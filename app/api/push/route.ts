@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+// FIX: Explicitly import `process` from `node:process` to resolve the TypeScript error
+// "Property 'cwd' does not exist on type 'Process'".
+import { process } from 'node:process';
 
 export const dynamic = 'force-dynamic'; // évite le cache route
 
-const DATA_DIR = process.env.DATA_DIR || '/data';
+// Correction : Écrire dans le dossier `public` pour que le fichier soit servi statiquement
+const DATA_DIR = join(process.cwd(), 'public', 'data');
 const PUSH_TOKEN = process.env.PUSH_TOKEN;
 
 export async function POST(req: NextRequest) {
@@ -20,7 +24,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
     }
 
+    // S'assurer que le répertoire de destination existe
     await mkdir(DATA_DIR, { recursive: true });
+    
+    // Écrire le fichier de disponibilité
     await writeFile(join(DATA_DIR, 'availability.json'), JSON.stringify(data, null, 2), 'utf8');
 
     return NextResponse.json({ ok: true, count: data.length });
