@@ -23,7 +23,7 @@ const joinUrl = (base: string, path: string) => {
   return `${base}/${sanitizedPath}`;
 };
 
-const lotRefFromSlug = (slug: string) => slug.replace(/-/g, '-').toUpperCase();
+const lotRefFromSlug = (slug: string) => slug.replace(/-/g, ' ').toUpperCase();
 
 const loadFromIcs = async (): Promise<RawBooking[] | null> => {
   if (!shouldUseIcs()) return null;
