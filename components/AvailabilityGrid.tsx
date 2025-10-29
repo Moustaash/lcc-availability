@@ -125,8 +125,8 @@ const AvailabilityGrid: React.FC<AvailabilityGridProps> = ({ properties, booking
   };
 
   return (
-    <div className="overflow-x-auto border border-border-light dark:border-border-dark rounded-lg">
-      <div className="grid" style={{ gridTemplateColumns: `minmax(150px, auto) repeat(${daysInMonth}, minmax(35px, 1fr))` }}>
+    <div className="overflow-hidden border border-border-light dark:border-border-dark rounded-lg">
+      <div className="grid" style={{ gridTemplateColumns: `minmax(150px, auto) repeat(${daysInMonth}, 1fr)` }}>
         <div className="sticky top-0 left-0 z-30 bg-card-light dark:bg-card-dark border-b border-r border-border-light dark:border-border-dark flex items-center justify-center p-2 h-16">
             <h2 className="font-bold text-sm capitalize text-center">{monthName}</h2>
         </div>
