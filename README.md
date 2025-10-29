@@ -11,7 +11,7 @@ Ce projet est une application web interactive conçue pour visualiser la disponi
 - **Recherche et Filtrage :**
   - Recherche par nom de chalet (vue bureau).
   - Recherche par date spécifique, qui met en évidence la disponibilité de tous les chalets pour le jour sélectionné.
-- **Chargement Dynamique des Données :** Les disponibilités ne sont pas codées en dur, mais chargées depuis un fichier JSON externe, permettant des mises à jour sans redéployer l'application.
+- **Chargement Dynamique des Données :** Les disponibilités sont récupérées automatiquement via des fichiers iCalendar (`.ics`) ou via un fichier JSON externe. Cette flexibilité permet d'alimenter l'outil directement depuis les flux générés par n8n sans redéploiement.
 - **Thème Sombre/Clair :** Un sélecteur de thème pour s'adapter aux préférences de l'utilisateur.
 - **Indicateurs Visuels Clairs :** Utilisation de codes couleur et d'icônes pour distinguer les réservations confirmées, les options et les jours disponibles.
 
@@ -85,6 +85,73 @@ Elle est conçue pour fonctionner de manière identique au workflow n8n : elle r
 ### 2. Mettre à Jour les Données via n8n
 
 Configurez votre workflow n8n pour qu'il dépose le fichier `availability.json` final au chemin exact attendu par votre serveur web (ex: `/app/dist/data/availability.json`). C'est la méthode recommandée en production.
+
+### Utiliser des flux iCalendar (`.ics`)
+
+L'application peut également charger automatiquement les indisponibilités à partir de flux iCalendar générés par n8n :
+
+1. Déposez chaque fichier `.ics` dans le dossier statique `/availability` du site (ex: `/app/dist/availability/alice.ics`). Le nom du fichier doit correspondre au _slug_ de la propriété (par exemple `alice.ics`, `savoie-53.ics`, etc.).
+2. Au chargement, le frontend récupère tous les calendriers `.ics`, les convertit en réservations (`reservation` ou `option`) puis les affiche.
+3. Si aucun calendrier `.ics` n'est accessible, l'application retombe automatiquement sur le fichier JSON de secours (`/data/availability.json`).
+
+Il est possible de pointer vers un autre emplacement (CDN, sous-domaine, etc.) via la variable d'environnement `VITE_ICS_BASE_URL`. Exemple : `VITE_ICS_BASE_URL="https://calendar.chalets-de-valdisere.com/availability"`.
+
+Pour désactiver complètement la lecture des fichiers iCalendar, définissez `VITE_USE_ICS=false`.
+
+#### Où récupérer les fichiers `.ics` générés par n8n ?
+
+Le dépôt des fichiers peut être automatisé grâce au workflow n8n décrit ci-dessous. L'idée générale est de monter un volume partagé entre n8n et un Nginx dédié aux calendriers :
+
+```yaml
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    volumes:
+      - ics-data:/data/site
+      - availability-data:/app/dist/data
+  ics-nginx:
+    image: nginx:alpine
+    volumes:
+      - ics-data:/usr/share/nginx/html
+      - ics-confd:/etc/nginx/conf.d
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        mkdir -p /usr/share/nginx/html/availability
+        chmod -R 0777 /usr/share/nginx/html
+        cat > /etc/nginx/conf.d/ics.conf <<'NGINX'
+        server {
+          listen 80;
+          location /availability/ {
+            alias /usr/share/nginx/html/availability/;
+            types { text/calendar ics; }
+            default_type text/calendar;
+            add_header Cache-Control "no-cache, must-revalidate";
+          }
+        }
+        NGINX
+        exec nginx -g 'daemon off;'
+volumes:
+  ics-data:
+  ics-confd:
+  availability-data:
+    external: true
+```
+
+Dans ce scénario :
+
+- Le noeud `Create ICS` du workflow n8n écrit chaque fichier iCalendar dans `/data/site/availability/<slug>.ics`, ce qui correspond au volume `ics-data` partagé avec Nginx.
+- Le conteneur `ics-nginx` expose ensuite les fichiers à l'URL publique `https://<votre-domaine>/availability/<slug>.ics`.
+- Le volume `availability-data` permet de continuer à pousser `availability.json` au même emplacement que l'application statique.
+
+Pour vérifier que le flux est correctement généré :
+
+1. Exécutez le workflow n8n ou attendez son déclenchement planifié.
+2. Contrôlez la présence du fichier dans le conteneur Nginx : `docker compose exec ics-nginx ls -l /usr/share/nginx/html/availability`.
+3. Testez l'URL depuis votre poste : `curl -I https://<votre-domaine>/availability/alice.ics` doit retourner un code `200` et un `Content-Type: text/calendar`.
+
+Configurez `VITE_ICS_BASE_URL` avec l'URL racine de ce service (ex. `https://calendar.chalets-de-valdisere.com/availability`) pour que l'application front récupère automatiquement les calendriers.
 
 ### 3. Mettre à Jour les Données via l'API (Alternative)
 
