@@ -11,7 +11,7 @@ Ce projet est une application web interactive conçue pour visualiser la disponi
 - **Recherche et Filtrage :**
   - Recherche par nom de chalet (vue bureau).
   - Recherche par date spécifique, qui met en évidence la disponibilité de tous les chalets pour le jour sélectionné.
-- **Chargement Dynamique des Données :** Les disponibilités ne sont pas codées en dur, mais chargées depuis un fichier JSON externe, permettant des mises à jour sans redéployer l'application.
+- **Chargement Dynamique des Données :** Les disponibilités sont récupérées automatiquement via des fichiers iCalendar (`.ics`) ou via un fichier JSON externe. Cette flexibilité permet d'alimenter l'outil directement depuis les flux générés par n8n sans redéploiement.
 - **Thème Sombre/Clair :** Un sélecteur de thème pour s'adapter aux préférences de l'utilisateur.
 - **Indicateurs Visuels Clairs :** Utilisation de codes couleur et d'icônes pour distinguer les réservations confirmées, les options et les jours disponibles.
 
@@ -85,6 +85,18 @@ Elle est conçue pour fonctionner de manière identique au workflow n8n : elle r
 ### 2. Mettre à Jour les Données via n8n
 
 Configurez votre workflow n8n pour qu'il dépose le fichier `availability.json` final au chemin exact attendu par votre serveur web (ex: `/app/dist/data/availability.json`). C'est la méthode recommandée en production.
+
+### Utiliser des flux iCalendar (`.ics`)
+
+L'application peut également charger automatiquement les indisponibilités à partir de flux iCalendar générés par n8n :
+
+1. Déposez chaque fichier `.ics` dans le dossier statique `/availability` du site (ex: `/app/dist/availability/alice.ics`). Le nom du fichier doit correspondre au _slug_ de la propriété (par exemple `alice.ics`, `savoie-53.ics`, etc.).
+2. Au chargement, le frontend récupère tous les calendriers `.ics`, les convertit en réservations (`reservation` ou `option`) puis les affiche.
+3. Si aucun calendrier `.ics` n'est accessible, l'application retombe automatiquement sur le fichier JSON de secours (`/data/availability.json`).
+
+Il est possible de pointer vers un autre emplacement (CDN, sous-domaine, etc.) via la variable d'environnement `VITE_ICS_BASE_URL`. Exemple : `VITE_ICS_BASE_URL="https://calendar.chalets-de-valdisere.com/availability"`.
+
+Pour désactiver complètement la lecture des fichiers iCalendar, définissez `VITE_USE_ICS=false`.
 
 ### 3. Mettre à Jour les Données via l'API (Alternative)
 
