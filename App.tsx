@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCalendarData } from './hooks/useCalendarData';
 import { PROPERTIES } from './constants';
 import Header from './components/Header';
@@ -14,6 +14,20 @@ const App: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 1)); // Default to Oct 2025 for demo
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [selectedPropertySlug, setSelectedPropertySlug] = useState<string>(PROPERTIES[0]?.slug);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchDate, setSearchDate] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (searchDate) {
+      // Navigate calendar view to the month of the selected searchDate
+      const newCurrentDate = new Date(Date.UTC(searchDate.getUTCFullYear(), searchDate.getUTCMonth(), 1));
+      setCurrentDate(newCurrentDate);
+    }
+  }, [searchDate]);
+
+  const filteredProperties = PROPERTIES.filter(property =>
+    property.nameFR.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const renderContent = () => {
     if (loading) {
@@ -41,14 +55,19 @@ const App: React.FC = () => {
           selectedPropertySlug={selectedPropertySlug}
           setSelectedPropertySlug={setSelectedPropertySlug}
           isMobile={isMobile}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          searchDate={searchDate}
+          setSearchDate={setSearchDate}
         />
         <div className="px-4 pb-4">
           <AvailabilityGrid
-            properties={PROPERTIES}
+            properties={filteredProperties}
             bookingsBySlug={bookingsBySlug}
             monthDate={currentDate}
             isMobile={isMobile}
             selectedPropertySlug={selectedPropertySlug}
+            searchDate={searchDate}
           />
         </div>
         <Legend />
