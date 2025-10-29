@@ -7,11 +7,13 @@ import FilterControls from './components/FilterControls';
 import Legend from './components/Legend';
 import Spinner from './components/Spinner';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { useMediaQuery } from './hooks/useMediaQuery';
 
 const App: React.FC = () => {
   const { bookingsBySlug, syncStatus, loading, error } = useCalendarData();
-  const [startDate, setStartDate] = useState(new Date(2025, 9, 1)); // Default to Oct 2025 for demo
-  const [numMonths, setNumMonths] = useState(3);
+  const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 1)); // Default to Oct 2025 for demo
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [selectedPropertySlug, setSelectedPropertySlug] = useState<string>(PROPERTIES[0]?.slug);
 
   const renderContent = () => {
     if (loading) {
@@ -33,17 +35,20 @@ const App: React.FC = () => {
     return (
       <>
         <FilterControls
-          startDate={startDate}
-          setStartDate={setStartDate}
-          numMonths={numMonths}
-          setNumMonths={setNumMonths}
+          currentDate={currentDate}
+          setCurrentDate={setCurrentDate}
+          properties={PROPERTIES}
+          selectedPropertySlug={selectedPropertySlug}
+          setSelectedPropertySlug={setSelectedPropertySlug}
+          isMobile={isMobile}
         />
         <div className="px-4 pb-4">
           <AvailabilityGrid
             properties={PROPERTIES}
             bookingsBySlug={bookingsBySlug}
-            startDate={startDate}
-            numMonths={numMonths}
+            monthDate={currentDate}
+            isMobile={isMobile}
+            selectedPropertySlug={selectedPropertySlug}
           />
         </div>
         <Legend />

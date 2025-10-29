@@ -59,6 +59,14 @@
     html.dark ::-webkit-scrollbar-track { background: #0d1117; }
     html.dark ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
     html.dark ::-webkit-scrollbar-thumb:hover { background: #48515c; }
+    /* Utility to hide scrollbars */
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-hide {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
   </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark antialiased">
