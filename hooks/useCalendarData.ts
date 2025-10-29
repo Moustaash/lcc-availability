@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Booking, RawBooking, BookingStatus, SyncStatus } from '../types';
-import { rawBookingData } from '../services/bookingData';
+import { loadAvailability } from '../services/availabilityService';
 
 const processBookings = (data: RawBooking[]): Map<string, Booking[]> => {
   const bookingMap = new Map<string, Booking[]>();
@@ -9,6 +9,10 @@ const processBookings = (data: RawBooking[]): Map<string, Booking[]> => {
   const unavailableBookings = data.filter(rb => !rb.is_available);
 
   unavailableBookings.forEach((rawBooking) => {
+    // Handle cases where Mode might be missing
+    if (!rawBooking.Mode) {
+        return;
+    }
     const slug = rawBooking.lot_ref.toLowerCase();
 
     // The booking is for the nights from startDate up to (but not including) endDate.
@@ -43,14 +47,12 @@ export const useCalendarData = () => {
       setError(null);
       setSyncStatus(SyncStatus.Syncing);
       try {
-        // Simulate network delay to show loading state
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const processedData = processBookings(rawBookingData);
+        const availabilityData = await loadAvailability();
+        const processedData = processBookings(availabilityData);
         setBookingsBySlug(processedData);
         setSyncStatus(SyncStatus.Success);
       } catch (err) {
-        setError('Échec du traitement des données de réservation.');
+        setError('Échec du chargement des données de disponibilité.');
         setSyncStatus(SyncStatus.Error);
         console.error(err);
       } finally {
