@@ -1,10 +1,9 @@
+// /app/api/push/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
-// FIX: Import Buffer to resolve 'Cannot find name Buffer' error.
-import { Buffer } from 'node:buffer';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
 
-const FEEDS_DIR = process.env.FEEDS_DIR || '/data/feeds';
+const DATA_DIR = process.env.DATA_DIR || '/data';
 const PUSH_TOKEN = process.env.PUSH_TOKEN;
 
 export async function POST(req: NextRequest) {
@@ -12,20 +11,13 @@ export async function POST(req: NextRequest) {
   if (!PUSH_TOKEN || !auth.startsWith('Bearer ') || auth.slice(7) !== PUSH_TOKEN) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  try {
-    const { catalog, files } = await req.json();
-    await mkdir(FEEDS_DIR, { recursive: true });
 
-    if (catalog) {
-      await writeFile(join(FEEDS_DIR, 'catalog.json'), JSON.stringify(catalog, null, 2), 'utf8');
-    }
-    if (Array.isArray(files)) {
-      for (const f of files) {
-        const buf = Buffer.from(f.content, 'base64');
-        await writeFile(join(FEEDS_DIR, f.name), buf); // ex: residence-mathilda.ics
-      }
-    }
-    return NextResponse.json({ ok: true });
+  try {
+    const body = await req.json();
+    await mkdir(DATA_DIR, { recursive: true });
+    await writeFile(join(DATA_DIR, 'availability.json'), JSON.stringify(body.data, null, 2));
+  
+    return NextResponse.json({ ok: true, count: body.data?.length || 0 });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'Bad Request' }, { status: 400 });
   }

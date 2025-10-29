@@ -1,5 +1,6 @@
 import React from 'react';
 import { Property, Booking, BookingStatus } from '../types';
+import Spinner from './Spinner';
 
 interface AvailabilityGridProps {
   properties: Property[];
@@ -8,6 +9,7 @@ interface AvailabilityGridProps {
   isMobile: boolean;
   selectedPropertySlug: string;
   searchDate: Date | null;
+  loading: boolean;
 }
 
 const getDaysInMonth = (year: number, month: number) => {
@@ -33,11 +35,43 @@ const getBookingStatusForDate = (
   return { status: 'available', booking: null };
 };
 
-const AvailabilityGrid: React.FC<AvailabilityGridProps> = ({ properties, bookingsBySlug, monthDate, isMobile, selectedPropertySlug, searchDate }) => {
+const StatusIndicator: React.FC<{ status: 'available' | BookingStatus; centered?: boolean }> = ({ status, centered = false }) => {
+  let color = '';
+  let text = '';
+  switch (status) {
+    case BookingStatus.Confirmed:
+      color = 'bg-status-confirmed';
+      text = 'Réservé';
+      break;
+    case BookingStatus.Option:
+      color = 'bg-status-option';
+      text = 'Option';
+      break;
+    default:
+      return <span className={`text-xs font-normal text-green-500 ${centered ? 'text-center' : ''}`}>Disponible</span>;
+  }
+  return (
+    <div className={`flex items-center space-x-1.5 ${centered ? 'justify-center' : ''}`}>
+      <div className={`w-2 h-2 rounded-full ${color}`}></div>
+      <span className="text-xs font-normal">{text}</span>
+    </div>
+  );
+};
+
+const AvailabilityGrid: React.FC<AvailabilityGridProps> = ({ properties, bookingsBySlug, monthDate, isMobile, selectedPropertySlug, searchDate, loading }) => {
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-96 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg">
+        <Spinner />
+      </div>
+    );
+  }
+
   const year = monthDate.getUTCFullYear();
   const month = monthDate.getUTCMonth();
   
   if (isMobile) {
+    const selectedProperty = properties.find(p => p.slug === selectedPropertySlug);
     const bookings = bookingsBySlug.get(selectedPropertySlug) || [];
     const daysInMonth = getDaysInMonth(year, month);
     const firstDayDate = new Date(Date.UTC(year, month, 1));
@@ -83,9 +117,22 @@ const AvailabilityGrid: React.FC<AvailabilityGridProps> = ({ properties, booking
 
     return (
       <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-2 sm:p-4">
-        <h2 className="font-bold text-lg capitalize text-center mb-4">
+        {selectedProperty && (
+          <div className="text-center mb-4">
+            <h2 className="font-bold text-xl">{selectedProperty.nameFR}</h2>
+            {searchDate && (
+              <div className="mt-1">
+                <StatusIndicator 
+                  status={getBookingStatusForDate(selectedPropertySlug, searchDate, bookingsBySlug).status} 
+                  centered 
+                />
+              </div>
+            )}
+          </div>
+        )}
+        <h3 className="font-semibold text-base capitalize text-center mb-4">
           {monthDate.toLocaleString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' })}
-        </h2>
+        </h3>
         <div className="grid grid-cols-7 text-center">
           {weekdays.map((wd, i) => (
             <div key={i} className="font-bold text-xs text-text-light/60 dark:text-text-dark/60 pb-2">{wd}</div>
@@ -151,29 +198,6 @@ const AvailabilityGrid: React.FC<AvailabilityGridProps> = ({ properties, booking
     });
   };
   
-  const StatusIndicator = ({ status }: { status: 'available' | BookingStatus }) => {
-    let color = '';
-    let text = '';
-    switch(status) {
-      case BookingStatus.Confirmed:
-        color = 'bg-status-confirmed';
-        text = 'Confirmé';
-        break;
-      case BookingStatus.Option:
-        color = 'bg-status-option';
-        text = 'Option';
-        break;
-      default:
-        return <span className="text-xs font-normal text-green-500">Disponible</span>;
-    }
-    return (
-      <div className="flex items-center space-x-1.5">
-        <div className={`w-2 h-2 rounded-full ${color}`}></div>
-        <span className="text-xs font-normal">{text}</span>
-      </div>
-    );
-  };
-
   return (
     <div className="overflow-hidden border border-border-light dark:border-border-dark rounded-lg">
       <div className="grid" style={{ gridTemplateColumns: `minmax(200px, auto) repeat(${daysInMonth}, 1fr)` }}>

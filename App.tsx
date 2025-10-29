@@ -30,14 +30,6 @@ const App: React.FC = () => {
   );
 
   const renderContent = () => {
-    if (loading) {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <Spinner />
-        </div>
-      );
-    }
-
     if (error) {
       return (
         <div className="text-center text-red-500 p-4">
@@ -62,6 +54,7 @@ const App: React.FC = () => {
         />
         <div className="px-4 pb-4">
           <AvailabilityGrid
+            loading={loading}
             properties={filteredProperties}
             bookingsBySlug={bookingsBySlug}
             monthDate={currentDate}
