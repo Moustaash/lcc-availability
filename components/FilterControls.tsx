@@ -1,5 +1,5 @@
 import React from 'react';
-import { Property } from '../types';
+import { Property, Booking, BookingStatus } from '../types';
 
 interface FilterControlsProps {
   currentDate: Date;
@@ -12,7 +12,27 @@ interface FilterControlsProps {
   setSearchTerm: (term: string) => void;
   searchDate: Date | null;
   setSearchDate: (date: Date | null) => void;
+  bookingsBySlug: Map<string, Booking[]>;
 }
+
+const getBookingStatusForDate = (
+  slug: string, 
+  date: Date, 
+  bookingsBySlug: Map<string, Booking[]>
+): { status: BookingStatus | 'available', booking: Booking | null } => {
+  const bookings = bookingsBySlug.get(slug.toLowerCase()) || [];
+  const searchTime = date.getTime();
+
+  for (const booking of bookings) {
+    const startTime = booking.startDate.getTime();
+    const endTime = booking.endDate.getTime();
+    if (searchTime >= startTime && searchTime < endTime) {
+      return { status: booking.status, booking: booking };
+    }
+  }
+
+  return { status: 'available', booking: null };
+};
 
 const FilterControls: React.FC<FilterControlsProps> = ({ 
   currentDate, 
@@ -25,6 +45,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
   setSearchTerm,
   searchDate,
   setSearchDate,
+  bookingsBySlug
 }) => {
   
   const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,28 +155,55 @@ const FilterControls: React.FC<FilterControlsProps> = ({
         <div className="w-full">
           <label className="sr-only">Choisir un bien</label>
           <div className="flex overflow-x-auto space-x-3 pb-2 -mx-4 px-4 scrollbar-hide">
-            {properties.map(prop => (
-              <button
-                key={prop.slug}
-                onClick={() => setSelectedPropertySlug(prop.slug)}
-                className={`flex-shrink-0 flex flex-col items-center justify-center p-2 rounded-lg border-2 w-20
-                  transition-all duration-200 ease-in-out
-                  ${selectedPropertySlug === prop.slug 
-                    ? 'border-primary bg-primary/10' 
-                    : 'border-transparent bg-card-light dark:bg-card-dark hover:bg-black/5 dark:hover:bg-white/10'
-                  }`}
-                aria-pressed={selectedPropertySlug === prop.slug}
-              >
-                <img 
-                  src={prop.imageUrl} 
-                  alt={prop.nameFR} 
-                  className="w-10 h-10 object-cover rounded-full mb-1"
-                />
-                <span className="text-xs font-medium text-text-light dark:text-text-dark text-center truncate w-full">
-                  {prop.nameFR}
-                </span>
-              </button>
-            ))}
+            {properties.map(prop => {
+              let statusText = '';
+              let statusColor = '';
+
+              if (searchDate) {
+                const { status } = getBookingStatusForDate(prop.slug, searchDate, bookingsBySlug);
+                switch (status) {
+                  case BookingStatus.Confirmed:
+                    statusText = 'Réservé';
+                    statusColor = 'text-status-confirmed';
+                    break;
+                  case BookingStatus.Option:
+                    statusText = 'Option';
+                    statusColor = 'text-status-option';
+                    break;
+                  default:
+                    statusText = 'Disponible';
+                    statusColor = 'text-green-500';
+                }
+              }
+
+              return (
+                <button
+                  key={prop.slug}
+                  onClick={() => setSelectedPropertySlug(prop.slug)}
+                  className={`flex-shrink-0 flex flex-col items-center justify-center p-2 rounded-lg border-2 w-24 h-28
+                    transition-all duration-200 ease-in-out
+                    ${selectedPropertySlug === prop.slug 
+                      ? 'border-primary bg-primary/10' 
+                      : 'border-transparent bg-card-light dark:bg-card-dark hover:bg-black/5 dark:hover:bg-white/10'
+                    }`}
+                  aria-pressed={selectedPropertySlug === prop.slug}
+                >
+                  <img 
+                    src={prop.imageUrl} 
+                    alt={prop.nameFR} 
+                    className="w-10 h-10 object-cover rounded-full mb-1"
+                  />
+                  <span className="text-xs font-medium text-text-light dark:text-text-dark text-center truncate w-full">
+                    {prop.nameFR}
+                  </span>
+                  {searchDate && (
+                    <span className={`text-xs mt-1 font-semibold ${statusColor}`}>
+                      {statusText}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

@@ -51,6 +51,7 @@ const App: React.FC = () => {
           setSearchTerm={setSearchTerm}
           searchDate={searchDate}
           setSearchDate={setSearchDate}
+          bookingsBySlug={bookingsBySlug}
         />
         <div className="px-4 pb-4">
           <AvailabilityGrid
