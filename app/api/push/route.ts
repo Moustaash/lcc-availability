@@ -7,8 +7,9 @@ import { process } from 'node:process';
 
 export const dynamic = 'force-dynamic'; // évite le cache route
 
-// Correction : Écrire dans le dossier `public` pour que le fichier soit servi statiquement
-const DATA_DIR = join(process.cwd(), 'public', 'data');
+// Correction : Écrire dans le dossier `dist` pour correspondre au workflow de production (n8n)
+// et à un déploiement statique (ex: nginx servant le contenu de `dist`).
+const DATA_DIR = join(process.cwd(), 'dist', 'data');
 const PUSH_TOKEN = process.env.PUSH_TOKEN;
 
 export async function POST(req: NextRequest) {
